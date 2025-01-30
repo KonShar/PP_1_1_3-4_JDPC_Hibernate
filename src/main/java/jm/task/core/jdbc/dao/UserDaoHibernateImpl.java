@@ -23,11 +23,11 @@ public class UserDaoHibernateImpl implements UserDao {
     public void createUsersTable() {
         try (Session session = sessionFactory.getCurrentSession()) {
             session.beginTransaction();
-            session.createSQLQuery("CREATE TABLE IF NOT EXISTS users" +
+            session.createSQLQuery("CREATE TABLE IF NOT EXISTS user" +
                     " (id INT PRIMARY KEY AUTO_INCREMENT," +
                     " name VARCHAR(255)," +
                     " lastName VARCHAR(255)," +
-                    " age TINYINT)");
+                    " age TINYINT)").executeUpdate();
             session.getTransaction().commit();
         }
     }
@@ -36,7 +36,7 @@ public class UserDaoHibernateImpl implements UserDao {
     public void dropUsersTable() {
         try (Session session = sessionFactory.getCurrentSession()) {
             session.beginTransaction();
-            session.createSQLQuery("DROP TABLE IF EXISTS users");
+            session.createSQLQuery("DROP TABLE IF EXISTS user").executeUpdate();
             session.getTransaction().commit();
         }
 
@@ -66,6 +66,7 @@ public class UserDaoHibernateImpl implements UserDao {
         try (Session session = sessionFactory.getCurrentSession()) {
             session.beginTransaction();
             users = session.createQuery("FROM User").getResultList();
+            session.getTransaction().commit();
         }
         return users;
     }
@@ -73,9 +74,16 @@ public class UserDaoHibernateImpl implements UserDao {
     @Override
     public void cleanUsersTable() {
         try (Session session = sessionFactory.getCurrentSession()) {
-            session.beginTransaction();
-            session.createQuery("DELETE FROM users").executeUpdate();
+            Transaction transaction = session.getTransaction();
+            try {
+                transaction.begin();
+                session.createQuery("DELETE FROM User").executeUpdate();
+                transaction.commit();
+            } catch (Exception e) {
+                if (transaction.isActive()) {
+                    transaction.rollback();
+                }
+            }
         }
-
     }
 }
