@@ -45,18 +45,28 @@ public class UserDaoHibernateImpl implements UserDao {
     @Override
     public void saveUser(String name, String lastName, byte age) {
         try (Session session = sessionFactory.getCurrentSession()) {
-            session.beginTransaction();
-            session.save(new User(name, lastName, age));
-            session.getTransaction().commit();
+            Transaction transaction = session.getTransaction();
+            try {
+                transaction.begin();
+                session.save(new User(name, lastName, age));
+                transaction.commit();
+            } catch (Exception e) {
+                transaction.rollback();
+            }
         }
     }
 
     @Override
     public void removeUserById(long id) {
         try (Session session = sessionFactory.getCurrentSession()) {
-            session.beginTransaction();
-            session.delete(session.get(User.class, id));
-            session.getTransaction().commit();
+            Transaction transaction = session.getTransaction();
+            try {
+                transaction.begin();
+                session.delete(session.get(User.class, id));
+                transaction.commit();
+            } catch (Exception e) {
+                transaction.rollback();
+            }
         }
     }
 
@@ -64,9 +74,14 @@ public class UserDaoHibernateImpl implements UserDao {
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
         try (Session session = sessionFactory.getCurrentSession()) {
-            session.beginTransaction();
-            users = session.createQuery("FROM User").getResultList();
-            session.getTransaction().commit();
+            Transaction transaction = session.getTransaction();
+            try {
+                transaction.begin();
+                users = session.createQuery("FROM User").getResultList();
+                transaction.commit();
+            } catch (Exception e) {
+                transaction.rollback();
+            }
         }
         return users;
     }
@@ -80,9 +95,7 @@ public class UserDaoHibernateImpl implements UserDao {
                 session.createQuery("DELETE FROM User").executeUpdate();
                 transaction.commit();
             } catch (Exception e) {
-                if (transaction.isActive()) {
-                    transaction.rollback();
-                }
+                transaction.rollback();
             }
         }
     }
