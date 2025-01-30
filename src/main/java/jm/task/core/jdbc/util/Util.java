@@ -10,7 +10,6 @@ public class Util {
     private static final String USER = "user";
     private static final String PASSWORD = "user";
 
-    public Util() {}
 
     public  Connection getConnection() {
         try {
@@ -18,6 +17,5 @@ public class Util {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
     }
 }
