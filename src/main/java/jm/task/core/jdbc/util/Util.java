@@ -15,6 +15,7 @@ public class Util {
     private static final String URL = "jdbc:mysql://localhost:3306/PreProjectDB";
     private static final String USER = "user";
     private static final String PASSWORD = "user";
+    private SessionFactory sessionFactory;
 
 
     public  Connection getConnection() {
@@ -26,21 +27,25 @@ public class Util {
     }
 
     public SessionFactory getSessionFactory() {
-        Configuration configuration = new Configuration();
-        try {
-            Properties properties = new Properties();
-            properties.put(Environment.DRIVER, "com.mysql.jdbc.Driver");
-            properties.put(Environment.URL, URL);
-            properties.put(Environment.USER, USER);
-            properties.put(Environment.PASS, PASSWORD);
-            properties.put(Environment.DIALECT, "org.hibernate.dialect.MySQL5Dialect");
-            properties.put(Environment.SHOW_SQL, "true");
-            properties.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "thread");
-            configuration.setProperties(properties);
-            configuration.addAnnotatedClass(User.class);
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (sessionFactory == null) {
+            Configuration configuration = new Configuration();
+            try {
+                Properties properties = new Properties();
+                properties.put(Environment.DRIVER, "com.mysql.jdbc.Driver");
+                properties.put(Environment.URL, URL);
+                properties.put(Environment.USER, USER);
+                properties.put(Environment.PASS, PASSWORD);
+                properties.put(Environment.DIALECT, "org.hibernate.dialect.MySQL5Dialect");
+                properties.put(Environment.SHOW_SQL, "true");
+                properties.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "thread");
+                configuration.setProperties(properties);
+                configuration.addAnnotatedClass(User.class);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return configuration.buildSessionFactory();
+        } else {
+            return sessionFactory;
         }
-        return configuration.buildSessionFactory();
     }
 }
